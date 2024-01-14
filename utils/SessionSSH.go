@@ -25,23 +25,23 @@ func SessionSSH(s ssh.Session) {
 
 	// Chat with GPT over SSH!
 	for {
-		t.SetPrompt("> ")
+		t.SetPrompt("👦: ")
 		input, _ := t.ReadLine()
 
 		// Handle exit
 		if input == "exit" {
-			s.Write([]byte("Goodbye!\n"))
+			sendMessage(&s, "Goodbye!")
 			return
 		}
 
 		words := len(strings.Fields(input))
 		if words < 3 {
-			s.Write([]byte("Hey, at least 3 words please.\n"))
+			sendMessage(&s, "Hey, at least 3 words please.")
 			continue
 		}
 		// ChatGPT Query
-		s.Write([]byte("Okay, gimme a sec...\n"))
+		sendMessage(&s, "Gimme sec...")
 		answer, _ := Chat(input)
-		s.Write([]byte(answer + "\n"))
+		sendMessage(&s, answer)
 	}
 }
