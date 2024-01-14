@@ -1,6 +1,8 @@
 package main
 
 import (
+	"chatssh/utils"
+	"fmt"
 	"time"
 
 	"github.com/gliderlabs/ssh"
@@ -8,17 +10,22 @@ import (
 )
 
 func main() {
+	conf := &utils.Config
+	utils.LoadConfig()
+
 	ssh.Handle(func(s ssh.Session) {
 		var pass string
 		t := term.NewTerminal(s, "")
 
-		for pass != "pass" {
-			pass, _ = t.ReadPassword("")
-			if pass == "exit" {
-				s.Close()
-				return
+		if conf.RequireSecret {
+			for pass != conf.Secret {
+				pass, _ = t.ReadPassword("")
+				if pass == "exit" {
+					s.Close()
+					return
+				}
+				time.Sleep(time.Second)
 			}
-			time.Sleep(time.Second)
 		}
 
 		for {
@@ -33,5 +40,9 @@ func main() {
 		}
 	})
 
-	ssh.ListenAndServe(":2222", nil)
+	fmt.Println("SSH server is listening on " + conf.ListenAddr)
+	e := ssh.ListenAndServe(conf.ListenAddr, nil)
+	if e != nil {
+		fmt.Println(e.Error())
+	}
 }
